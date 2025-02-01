@@ -5,19 +5,19 @@ export type StoreOptions = {
     file: string;
     maxCacheObjects?: number;
 }
-export type Store = JStore;
+export type Store<T> = JStore<T>;
 
 const DEFAULT_MAX_CACHE_OBJECTS = 256;
 const MAIN_FILE_MAGIC = Buffer.from('JStore-MainFile');
 const MAIN_FILE_VERSION = 1;
 
-export function createStore(opts: StoreOptions): Promise<Store> {
+export function createStore<T = any>(opts: StoreOptions): Promise<Store<T>> {
     if (opts.maxCacheObjects === undefined) opts.maxCacheObjects = DEFAULT_MAX_CACHE_OBJECTS;
-    const store = new JStore(opts.file);
+    const store = new JStore<T>(opts.file);
     return store.init();
 }
 
-class JStore {
+class JStore<T> {
     #path: string;
     #handle: fs.FileHandle;
 
@@ -80,7 +80,7 @@ class JStore {
         const queryEntries = Object.entries(query);
 
         const objs = await this.getAll();
-        const matches: any[] = [];
+        const matches: T[] = [];
         for (const obj of objs) {
             // Check if matches query
             for (const [key, val] of queryEntries) {
@@ -91,7 +91,7 @@ class JStore {
     }
 
     async getAll() {
-        const items: any[] = [];
+        const items: T[] = [];
         const buf = await fs.readFile(this.#path);
         let offset = MAIN_FILE_MAGIC.length + 4;
         while (offset < buf.length) {
@@ -114,4 +114,3 @@ class JStore {
         return this.#handle.close();
     }
 }
-
