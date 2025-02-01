@@ -68,7 +68,6 @@ function encode(val: any, buf: ExpandableBuffer) {
 }
 
 // Decoder
-
 export function decodeObject(buf: DataView) {
     const entriesCount = buf.getUint32(0, true);
     const obj = Object.create(null);

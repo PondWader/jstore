@@ -1,5 +1,5 @@
 import fs from "node:fs/promises";
-import { encodeObject } from "./binary.ts";
+import { decodeObject, encodeObject } from "./binary.ts";
 
 export type StoreOptions = {
     file: string;
@@ -51,6 +51,8 @@ class JStore {
             }
         }
 
+        // TODO: Check if there are any partial writes that need recovered from
+
         return this;
     }
 
@@ -58,11 +60,49 @@ class JStore {
         await this.#handle.appendFile(encodeObject(obj));
     }
 
-    search() {
 
+    // Extremely unoptimised implementations just for demonstration for now
+
+    async find(query: any) {
+        const queryEntries = Object.entries(query);
+
+        const objs = await this.getAll();
+        for (const obj of objs) {
+            // Check if matches query
+            for (const [key, val] of queryEntries) {
+                if (obj[key] === val) return obj;
+            }
+        }
+        return null;
     }
 
-    getAll() {
+    async findMany(query: any) {
+        const queryEntries = Object.entries(query);
+
+        const objs = await this.getAll();
+        const matches: any[] = [];
+        for (const obj of objs) {
+            // Check if matches query
+            for (const [key, val] of queryEntries) {
+                if (obj[key] === val) matches.push(obj);
+            }
+        }
+        return matches;
+    }
+
+    async getAll() {
+        const items: any[] = [];
+        const buf = await fs.readFile(this.#path);
+        let offset = MAIN_FILE_MAGIC.length + 4;
+        while (offset < buf.length) {
+            const result = decodeObject(new DataView(buf.buffer.slice(offset)));
+            offset += result.bytesRead;
+            items.push(result.result);
+        }
+        return items;
+    }
+
+    delete() {
 
     }
 
@@ -71,7 +111,7 @@ class JStore {
     }
 
     close() {
-        this.#handle.close();
+        return this.#handle.close();
     }
 }
 
