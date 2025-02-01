@@ -56,14 +56,14 @@ class JStore<T> {
         return this;
     }
 
-    async add(obj: any) {
+    async add(obj: T) {
         await this.#handle.appendFile(encodeObject(obj));
     }
 
 
     // Extremely unoptimised implementations just for demonstration for now
 
-    async find(query: any) {
+    async find(query: Partial<T>) {
         const queryEntries = Object.entries(query);
 
         const objs = await this.getAll();
@@ -76,7 +76,7 @@ class JStore<T> {
         return null;
     }
 
-    async findMany(query: any) {
+    async findMany(query: Partial<T>) {
         const queryEntries = Object.entries(query);
 
         const objs = await this.getAll();
@@ -103,6 +103,14 @@ class JStore<T> {
     }
 
     delete() {
+
+    }
+
+    deleteMany() {
+
+    }
+
+    deleteAll() {
 
     }
 

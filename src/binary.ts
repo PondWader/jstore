@@ -12,7 +12,7 @@ const ARRAY_CODE = 5;
 export function encodeObject(object: any) {
     if (typeof object !== 'object') throw new Error('Invalid object passed to encoder.');
 
-    let buf = new ExpandableBuffer();
+    const buf = new ExpandableBuffer();
     encodeObjectWithBuf(object, buf);
     return buf.toUint8Array();
 }
